@@ -7,8 +7,10 @@ environment:
   sdk: ^3.5.4
 
 dependencies:
+  fl_chart: ^0.69.0
   flutter:
     sdk: flutter
+  flutter_hooks: ^0.20.5
   riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
 
