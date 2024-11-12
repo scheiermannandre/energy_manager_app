@@ -1,4 +1,4 @@
-.PHONY: test lint generate wgenerate help run locale coverage prepareCommit
+.PHONY: test lint format generate wgenerate help run locale coverage prepareCommit
 
 .DEFAULT_GOAL := help
 
@@ -11,6 +11,9 @@ test: ## run tests
 lint: ## lint and autoformat this project
 	flutter analyze
 	dart format --set-exit-if-changed .
+
+format: ## lint and autoformat this project
+	dart format .
 
 locale: ## generate locale files
 	flutter gen-l10n
