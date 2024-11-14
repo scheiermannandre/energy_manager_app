@@ -1,48 +1,58 @@
 import 'package:energy_manager_app/features/monitoring/monitoring.dart';
+import 'package:energy_manager_app/foundation/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class MonitoringScreen extends ConsumerWidget {
-  const MonitoringScreen({
-    required this.title,
-    required this.metricType,
-    super.key,
-  });
+class MonitoringScreen extends HookWidget {
+  const MonitoringScreen({super.key});
 
-  final String title;
-  final MetricType metricType;
+  static const _tabs = <String>[
+    'Solar Generation',
+    'House Consumption',
+    'Battery Consumption',
+  ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncState =
-        ref.watch(monitoringScreenControllerProvider(metricType));
-    final controller =
-        ref.read(monitoringScreenControllerProvider(metricType).notifier);
-    return asyncState.when(
-      data: (state) => Scaffold(
-        appBar: AppBar(
-          centerTitle: false,
-          title: Text(title),
-        ),
-        body: Column(
-          children: [
-            SizedBox(
-              height: kToolbarHeight,
-              child: Center(
-                child: Text(state.selectedDate.toIso8601String()),
-              ),
+  Widget build(BuildContext context) {
+    final selectedIndex = useState<int>(0);
+    return MaterialApp(
+      home: Scaffold(
+        body: IndexedStack(
+          index: selectedIndex.value,
+          children: <Widget>[
+            MonitoringPage(
+              title: _tabs[0].hardCoded,
+              metricType: MetricType.solar,
             ),
-            const Center(
-              child: EnergyChart(),
+            MonitoringPage(
+              title: _tabs[1].hardCoded,
+              metricType: MetricType.house,
+            ),
+            MonitoringPage(
+              title: _tabs[2].hardCoded,
+              metricType: MetricType.battery,
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: controller.loadNextDatesMonitoringData,
+        bottomNavigationBar: BottomNavigationBar(
+          items: <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.wb_sunny),
+              label: _tabs[0].hardCoded,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.home),
+              label: _tabs[1].hardCoded,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.battery_full),
+              label: _tabs[2].hardCoded,
+            ),
+          ],
+          currentIndex: selectedIndex.value,
+          onTap: (value) => selectedIndex.value = value,
         ),
       ),
-      error: (e, st) => Center(child: Text('Error: $e')),
-      loading: () => const Center(child: CircularProgressIndicator()),
     );
   }
 }
