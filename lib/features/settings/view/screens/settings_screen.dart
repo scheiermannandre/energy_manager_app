@@ -26,6 +26,7 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         children: [
           ListTile(
+            leading: const Icon(Icons.flash_on),
             title: Text('Power Unit'.hardCoded),
             trailing: DropdownButton<PowerUnit>(
               value: powerUnitContext.unit,
@@ -47,6 +48,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           ListTile(
+            leading: const Icon(Icons.functions),
             title: Text('Down Sample Algorithm'.hardCoded),
             trailing: DropdownButton<DownSamplingAlgorithm>(
               value: downsampleContext.algorithm,
@@ -67,6 +69,28 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.clear),
+            title: Text('Clear Cache'.hardCoded),
+            onTap: () {
+              ref
+                  .read(
+                    monitoringPageControllerProvider(MetricType.solar).notifier,
+                  )
+                  .clearCache();
+              ref
+                  .read(
+                    monitoringPageControllerProvider(MetricType.house).notifier,
+                  )
+                  .clearCache();
+              ref
+                  .read(
+                    monitoringPageControllerProvider(MetricType.battery)
+                        .notifier,
+                  )
+                  .clearCache();
+            },
           ),
         ],
       ),

@@ -37,7 +37,7 @@ class MonitoringPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: asyncState.when(
+      body: asyncState.customWhen(
         data: (state) => HookBuilder(
           builder: (context) {
             final controller =
@@ -94,8 +94,12 @@ class MonitoringPage extends ConsumerWidget {
             );
           },
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+        loading: () => const LoadingWidget(),
+        error: (e, st) => LoadingErrorWidget(
+          error: e,
+          stackTrace: st,
+          onReload: () => ref.invalidate(screenControllerProvider),
+        ),
       ),
     );
   }

@@ -11,11 +11,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // include Data Preloading
 // date filtering
 // support Unit Switching
+// support Data Downsampling
+// support Data Caching
+// add option to clear cache
 
 // TODO:
-// TODO: cache fetched data
-// TODO: add option to clear cache
-// TODO: Implementuser-friendlyerrormessagesforconnectivityissuesorrequestfailures.
+// TODO: Implement user-friendly error messages for connectivity issues or request failures.
 
 // TODO: Include unit tests for core business logic.
 // TODO: Add widget tests to validate UI components and interactions
@@ -31,7 +32,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // • Bonus: Implementation of nice-to-have features like pull-to-refresh, dark mode, and data polling.
 
 // TODO: Optionals
-// TODO: Pull-to-refreshfunctionality.
+// TODO: Pull-to-refresh functionality.
 // TODO: Dark mode support.
 // TODO: Datapolling to automatically refresh data
 

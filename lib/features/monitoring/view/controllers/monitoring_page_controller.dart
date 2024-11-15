@@ -20,6 +20,14 @@ class MonitoringPageController extends _$MonitoringPageController {
     );
   }
 
+  void clearCache() {
+    state.value?.loadedDates.forEach(
+      (date) => ref
+          .read(monitoringWidgetControllerProvider(metricType, date).notifier)
+          .clearData(),
+    );
+  }
+
   Future<List<DateTime>> _generateAndPreloadListAsync(DateTime date) async {
     final dates = _generateList(date);
     await _preloadManyDatesMonitoringData(dates);

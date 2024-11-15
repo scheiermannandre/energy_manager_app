@@ -21,9 +21,10 @@ class MonitoringWidgetController extends _$MonitoringWidgetController {
       ..onDispose(() => timer?.cancel())
       ..onCancel(() => timer = Timer(5.minutes, link.close))
       ..onResume(() => timer?.cancel());
-
     return await ref
         .read(monitoringRepositoryProvider(metricType))
         .loadDate(date: dateStr);
   }
+
+  void clearData() => state = const AsyncValue.data([]);
 }

@@ -16,8 +16,16 @@ class MonitoringWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final monitoringData =
         ref.watch(monitoringWidgetControllerProvider(metricType, date));
-    return monitoringData.when(
+
+    return monitoringData.customWhen(
       data: (data) {
+        if (data.isEmpty) {
+          return NoDataAvailableWidget(
+            onRefresh: () async => ref.invalidate(
+              monitoringWidgetControllerProvider(metricType, date),
+            ),
+          );
+        }
         return Center(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -29,12 +37,13 @@ class MonitoringWidget extends ConsumerWidget {
           ),
         );
       },
-      loading: () {
-        return const Center(child: CircularProgressIndicator());
-      },
-      error: (error, _) {
-        return Center(child: Text('Error: $error'));
-      },
+      loading: LoadingWidget.new,
+      error: (error, st) => LoadingErrorWidget(
+        onReload: () async => ref
+            .invalidate(monitoringWidgetControllerProvider(metricType, date)),
+        error: error,
+        stackTrace: st,
+      ),
     );
   }
 }
