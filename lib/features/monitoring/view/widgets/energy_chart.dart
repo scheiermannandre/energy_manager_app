@@ -1,9 +1,11 @@
 import 'package:energy_manager_app/features/monitoring/monitoring.dart';
+import 'package:energy_manager_app/features/settings/settings.dart';
 import 'package:energy_manager_app/foundation/foundation.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class EnergyChart extends StatelessWidget {
+class EnergyChart extends ConsumerWidget {
   const EnergyChart({
     required this.data,
     required this.config,
@@ -19,13 +21,14 @@ class EnergyChart extends StatelessWidget {
   );
   static const minutes = 60.0;
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final powerUnitContext = ref.watch(powerUnitContextControllerProvider);
     final downsampledData =
         downsamplingContext.downsample(data, config.downsampleThreshold);
 
     const maxXValue = 24 * minutes;
     var maxYValue = downsampledData
-        .map((e) => e.value)
+        .map((e) => powerUnitContext.convert(e.value.toDouble()))
         .reduce((a, b) => a > b ? a : b)
         .ceilToDouble();
     final interval = maxYValue /
@@ -53,7 +56,8 @@ class EnergyChart extends StatelessWidget {
             ),
           ),
           rightTitles: AxisTitles(
-            axisNameWidget: Text('Leistung (W)'.hardCoded),
+            axisNameWidget:
+                Text('Power in ${powerUnitContext.unitLabel}'.hardCoded),
           ),
         ),
         borderData: FlBorderData(
@@ -67,8 +71,8 @@ class EnergyChart extends StatelessWidget {
             spots: downsampledData.map((model) {
               // Convert time to minutes since midnight
               final x = model.timestamp.hour * minutes + model.timestamp.minute;
-              final y = model.value;
-              return FlSpot(x, y.toDouble());
+              final y = powerUnitContext.convert(model.value.toDouble());
+              return FlSpot(x, y);
             }).toList(),
             isCurved: true,
             color: config.lineColor,
@@ -82,8 +86,12 @@ class EnergyChart extends StatelessWidget {
         ),
         lineTouchData: LineTouchData(
           touchTooltipData: LineTouchTooltipData(
-            getTooltipItems: (touchedSpots) =>
-                getTooltipItems(context, touchedSpots, config.toolTipStyle),
+            getTooltipItems: (touchedSpots) => getTooltipItems(
+              context,
+              touchedSpots,
+              config.toolTipStyle,
+              powerUnitContext,
+            ),
           ),
         ),
       ),
@@ -115,13 +123,14 @@ class EnergyChart extends StatelessWidget {
     BuildContext context,
     List<LineBarSpot> touchedSpots,
     TextStyle style,
+    PowerUnitContext powerUnitContext,
   ) {
     return touchedSpots.map((spot) {
       final flSpot = spot;
       final timeOfDay = _getTimeOfDay(flSpot.x);
       final formattedTime = timeOfDay.format(context);
       return LineTooltipItem(
-        '$formattedTime\n${flSpot.y} W'.hardCoded,
+        '$formattedTime\n${flSpot.y} ${powerUnitContext.unitLabel}'.hardCoded,
         style,
       );
     }).toList();
