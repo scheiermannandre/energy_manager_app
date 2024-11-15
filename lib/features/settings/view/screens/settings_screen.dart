@@ -1,3 +1,4 @@
+import 'package:energy_manager_app/features/monitoring/monitoring.dart';
 import 'package:energy_manager_app/features/settings/settings.dart';
 import 'package:energy_manager_app/foundation/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,12 @@ class SettingsScreen extends ConsumerWidget {
     final powerUnitContext = ref.watch(powerUnitControllerProvider);
     final powerUnitController = ref.read(powerUnitControllerProvider.notifier);
 
+    final downsampleContextControllerProvider =
+        downsamplingContextControllerProvider;
+    final downsampleContext = ref.watch(downsampleContextControllerProvider);
+    final downsampleController =
+        ref.read(downsampleContextControllerProvider.notifier);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Settings'.hardCoded),
@@ -19,7 +26,7 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         children: [
           ListTile(
-            title: Text('Units'.hardCoded),
+            title: Text('Power Unit'.hardCoded),
             trailing: DropdownButton<PowerUnit>(
               value: powerUnitContext.unit,
               onChanged: (PowerUnit? newValue) {
@@ -30,11 +37,33 @@ class SettingsScreen extends ConsumerWidget {
               items: [
                 DropdownMenuItem<PowerUnit>(
                   value: PowerUnit.watts,
-                  child: Text('Watts'.hardCoded),
+                  child: Text(PowerUnit.watts.label),
                 ),
                 DropdownMenuItem<PowerUnit>(
                   value: PowerUnit.kilowatts,
-                  child: Text('Kilowatts'.hardCoded),
+                  child: Text(PowerUnit.kilowatts.label),
+                ),
+              ],
+            ),
+          ),
+          ListTile(
+            title: Text('Down Sample Algorithm'.hardCoded),
+            trailing: DropdownButton<DownSamplingAlgorithm>(
+              value: downsampleContext.algorithm,
+              onChanged: (DownSamplingAlgorithm? newValue) {
+                if (newValue == null) return;
+                downsampleController.switchStrategy(
+                  DownsamplingStrategy.fromAlgorithm(newValue),
+                );
+              },
+              items: [
+                DropdownMenuItem<DownSamplingAlgorithm>(
+                  value: DownSamplingAlgorithm.none,
+                  child: Text(DownSamplingAlgorithm.none.label),
+                ),
+                DropdownMenuItem<DownSamplingAlgorithm>(
+                  value: DownSamplingAlgorithm.lttb,
+                  child: Text(DownSamplingAlgorithm.lttb.label),
                 ),
               ],
             ),

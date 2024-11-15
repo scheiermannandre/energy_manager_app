@@ -5,7 +5,6 @@ part 'power_unit_strategy.g.dart';
 
 abstract class PowerUnitStrategy {
   PowerUnitStrategy();
-
   factory PowerUnitStrategy.fromUnit(PowerUnit unit) {
     switch (unit) {
       case PowerUnit.watts:
@@ -14,9 +13,9 @@ abstract class PowerUnitStrategy {
         return KilowattsStrategy();
     }
   }
-  double convert(double value);
   String get unitLabel => unit.label;
   PowerUnit get unit;
+  double convert(double value);
 }
 
 class WattsStrategy extends PowerUnitStrategy {

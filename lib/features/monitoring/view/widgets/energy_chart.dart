@@ -16,15 +16,13 @@ class EnergyChart extends ConsumerWidget {
   final String date;
   final EnergyChartConfig config;
 
-  static DownsamplingContext downsamplingContext = DownsamplingContext(
-    LTTBDownsamplingStrategy(),
-  );
   static const minutes = 60.0;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final powerUnitContext = ref.watch(powerUnitContextControllerProvider);
+    final downsampleContext = ref.watch(downsamplingContextControllerProvider);
     final downsampledData =
-        downsamplingContext.downsample(data, config.downsampleThreshold);
+        downsampleContext.downsample(data, config.downsampleThreshold);
 
     const maxXValue = 24 * minutes;
     var maxYValue = downsampledData

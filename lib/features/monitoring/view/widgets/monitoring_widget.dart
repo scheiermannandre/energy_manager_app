@@ -21,17 +21,10 @@ class MonitoringWidget extends ConsumerWidget {
         return Center(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Text(date.formattedDate),
-                Expanded(
-                  child: EnergyChart(
-                    data: data,
-                    config: EnergyChartConfig(),
-                    date: date.formattedDate,
-                  ),
-                ),
-              ],
+            child: EnergyChart(
+              data: data,
+              config: EnergyChartConfig(),
+              date: date.formattedDate,
             ),
           ),
         );

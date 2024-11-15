@@ -1,3 +1,5 @@
+import 'package:energy_manager_app/foundation/foundation.dart';
+
 enum PowerUnit {
   watts,
   kilowatts;
@@ -5,9 +7,9 @@ enum PowerUnit {
   String get label {
     switch (this) {
       case PowerUnit.watts:
-        return 'W';
+        return 'W'.hardCoded;
       case PowerUnit.kilowatts:
-        return 'kW';
+        return 'kW'.hardCoded;
     }
   }
 }

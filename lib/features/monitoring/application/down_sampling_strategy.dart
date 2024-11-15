@@ -1,4 +1,7 @@
 import 'package:energy_manager_app/features/monitoring/monitoring.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'down_sampling_strategy.g.dart';
 
 class DownsamplingContext {
   DownsamplingContext(this._strategy);
@@ -6,7 +9,7 @@ class DownsamplingContext {
 
   // ignore: avoid_setters_without_getters
   set strategy(DownsamplingStrategy strategy) => _strategy = strategy;
-
+  DownSamplingAlgorithm get algorithm => _strategy.algorithm;
   List<MonitoringDataModel> downsample(
     List<MonitoringDataModel> data,
     int threshold,
@@ -17,6 +20,17 @@ class DownsamplingContext {
 
 // ignore: one_member_abstracts
 abstract class DownsamplingStrategy {
+  factory DownsamplingStrategy.fromAlgorithm(DownSamplingAlgorithm unit) {
+    switch (unit) {
+      case DownSamplingAlgorithm.none:
+        return NoDownsamplingStrategy();
+      case DownSamplingAlgorithm.lttb:
+        return LTTBDownsamplingStrategy();
+    }
+  }
+
+  DownSamplingAlgorithm get algorithm;
+
   List<MonitoringDataModel> downsample(
     List<MonitoringDataModel> data,
     int threshold,
@@ -24,6 +38,9 @@ abstract class DownsamplingStrategy {
 }
 
 class NoDownsamplingStrategy implements DownsamplingStrategy {
+  @override
+  DownSamplingAlgorithm get algorithm => DownSamplingAlgorithm.none;
+
   @override
   List<MonitoringDataModel> downsample(
     List<MonitoringDataModel> data,
@@ -34,6 +51,9 @@ class NoDownsamplingStrategy implements DownsamplingStrategy {
 }
 
 class LTTBDownsamplingStrategy implements DownsamplingStrategy {
+  @override
+  DownSamplingAlgorithm get algorithm => DownSamplingAlgorithm.lttb;
+
   @override
   List<MonitoringDataModel> downsample(
     List<MonitoringDataModel> data,
@@ -89,4 +109,13 @@ class LTTBDownsamplingStrategy implements DownsamplingStrategy {
 
     return sampled;
   }
+}
+
+@riverpod
+class DownsamplingContextController extends _$DownsamplingContextController {
+  @override
+  DownsamplingContext build() =>
+      DownsamplingContext(LTTBDownsamplingStrategy());
+  void switchStrategy(DownsamplingStrategy strategy) =>
+      state = DownsamplingContext(strategy);
 }
