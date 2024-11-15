@@ -23,7 +23,7 @@ class MonitoringWidget extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: EnergyChart(
               data: data,
-              config: EnergyChartConfig(),
+              config: EnergyChartConfig.fromMetrics(metricType),
               date: date.formattedDate,
             ),
           ),

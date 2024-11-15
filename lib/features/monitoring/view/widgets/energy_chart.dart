@@ -180,7 +180,10 @@ class EnergyChartConfig {
     TextStyle? tooltipTextStyle,
   })  : barAreaColor = areaBewlowBarColor ?? lineColor.withOpacity(0.3),
         xAxisStyle = xAxisTextStyle ??
-            TextStyle(color: titleTextColor, fontSize: titleFontSize),
+            TextStyle(
+              color: titleTextColor,
+              fontSize: titleFontSize,
+            ),
         yAxisStyle = yAxisTextStyle ??
             TextStyle(
               color: titleTextColor,
@@ -193,6 +196,25 @@ class EnergyChartConfig {
               fontWeight: FontWeight.bold,
               fontSize: titleFontSize,
             );
+
+  factory EnergyChartConfig.fromMetrics(MetricType metricType) {
+    switch (metricType) {
+      case MetricType.solar:
+        return EnergyChartConfig();
+      case MetricType.house:
+        return EnergyChartConfig(
+          lineColor: const Color.fromARGB(255, 237, 115, 34),
+          areaBewlowBarColor:
+              const Color.fromARGB(255, 237, 115, 34).withOpacity(0.3),
+        );
+      case MetricType.battery:
+        return EnergyChartConfig(
+          lineColor: const Color.fromARGB(255, 22, 190, 70),
+          areaBewlowBarColor:
+              const Color.fromARGB(255, 22, 190, 70).withOpacity(0.3),
+        );
+    }
+  }
   static const double titleFontSize = 12;
   final int downsampleThreshold;
   final int horizontalGridLineCount;
