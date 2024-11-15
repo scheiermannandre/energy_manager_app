@@ -17,11 +17,11 @@ class MonitoringWidget extends ConsumerWidget {
         ref.watch(monitoringWidgetControllerProvider(metricType, date));
     return monitoringData.when(
       data: (data) {
-        return Column(
-          children: [
-            Text('Data for $date'),
-            const EnergyChart(),
-          ],
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: EnergyChart(data: data, config: EnergyChartConfig()),
+          ),
         );
       },
       loading: () {
