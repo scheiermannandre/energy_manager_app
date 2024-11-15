@@ -1,9 +1,10 @@
 import 'package:energy_manager_app/features/monitoring/monitoring.dart';
+import 'package:energy_manager_app/foundation/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class MonitoringPage extends HookConsumerWidget {
+class MonitoringPage extends ConsumerWidget {
   const MonitoringPage({
     required this.title,
     required this.metricType,
@@ -12,57 +13,13 @@ class MonitoringPage extends HookConsumerWidget {
 
   final String title;
   final MetricType metricType;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller =
-        usePageController(initialPage: MonitoringPageState.index);
     final screenControllerProvider =
         monitoringPageControllerProvider(metricType);
     final asyncState = ref.watch(screenControllerProvider);
-
-    void next() {
-      ref.read(screenControllerProvider.notifier).next();
-      controller.jumpToPage(MonitoringPageState.index);
-    }
-
-    void prev() {
-      ref.read(screenControllerProvider.notifier).prev();
-      controller.jumpToPage(MonitoringPageState.index);
-    }
-
-    Future<void> pickDate() async {
-      final pickedDate = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(2000),
-        lastDate: DateTime(2100),
-      );
-
-      if (pickedDate != null) {
-        ref.read(screenControllerProvider.notifier).setDate(pickedDate);
-        controller.jumpToPage(MonitoringPageState.index);
-      }
-    }
-
-    useEffect(
-      () {
-        void listener() {
-          final index = controller.page! > MonitoringPageState.index
-              ? controller.page!.floor()
-              : controller.page!.ceil();
-          if (index == MonitoringPageState.index) return;
-          if (index == MonitoringPageState.index - 1) {
-            prev();
-          } else if (index == MonitoringPageState.index + 1) {
-            next();
-          }
-        }
-
-        controller.addListener(listener);
-        return () => controller.removeListener(listener);
-      },
-      [controller],
-    );
+    final screenController = ref.read(screenControllerProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -70,26 +27,61 @@ class MonitoringPage extends HookConsumerWidget {
         title: Text(title),
       ),
       body: asyncState.when(
-        data: (state) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            DateBarWidget(
-              selectedDate: state.selectedDate,
-              onPrevious: prev,
-              onNext: next,
-              pickDate: pickDate,
-            ),
-            Expanded(
-              child: PageView.builder(
-                controller: controller,
-                itemCount: state.loadedDates.length,
-                itemBuilder: (context, index) => MonitoringWidget(
-                  date: state.loadedDates[index],
-                  metricType: metricType,
+        data: (state) => HookBuilder(
+          builder: (context) {
+            final controller =
+                usePageController(initialPage: state.availableDates.length - 1);
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DateBarWidget(
+                  selectedDate: controller.hasClients
+                      ? state.availableDates[controller.page!.round()]
+                      : state.availableDates.last,
+                  onPrevious: () => controller.previousPage(
+                    duration: 300.milliseconds,
+                    curve: Curves.easeInOut,
+                  ),
+                  onNext: () => controller.nextPage(
+                    duration: 300.milliseconds,
+                    curve: Curves.easeInOut,
+                  ),
+                  pickDate: () async {
+                    final pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(MonitoringPageState.firstDateYear),
+                      lastDate: DateTime.now().date,
+                    );
+
+                    if (pickedDate != null) {
+                      final newIndex =
+                          state.availableDates.indexOf(pickedDate.date);
+                      if (newIndex != -1) {
+                        controller.jumpToPage(newIndex);
+                        screenController.preloadData(pickedDate);
+                      }
+                    }
+                  },
                 ),
-              ),
-            ),
-          ],
+                Expanded(
+                  child: PageView.builder(
+                    onPageChanged: (index) {
+                      ref.read(screenControllerProvider.notifier).preloadData(
+                            state.availableDates[index],
+                          );
+                    },
+                    controller: controller,
+                    itemCount: state.availableDates.length,
+                    itemBuilder: (context, index) => MonitoringWidget(
+                      date: state.availableDates[index],
+                      metricType: metricType,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Error: $e')),

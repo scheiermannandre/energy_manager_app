@@ -9,16 +9,14 @@ part 'monitoring_page_controller.g.dart';
 class MonitoringPageController extends _$MonitoringPageController {
   @override
   FutureOr<MonitoringPageState> build(MetricType metricType) async {
-    final now = DateTime.now();
+    final now = DateTime.now().date;
     return MonitoringPageState(
+      startDate: now,
       loadedDates: await _generateAndPreloadListAsync(now),
-    );
-  }
-
-  List<DateTime> _generateList(DateTime date) {
-    return List.generate(
-      MonitoringPageState.daysToLoad,
-      (index) => date.add((index - MonitoringPageState.index).days),
+      availableDates: List.generate(
+        now.difference(DateTime(MonitoringPageState.firstDateYear)).inDays,
+        (index) => now.subtract(index.days).date,
+      )..sort(),
     );
   }
 
@@ -28,50 +26,19 @@ class MonitoringPageController extends _$MonitoringPageController {
     return dates;
   }
 
-  List<DateTime> _generateAndPreloadList(DateTime date) {
-    final dates = _generateList(date);
-    unawaited(_preloadManyDatesMonitoringData(dates));
-    return dates;
-  }
-
-  void next() {
-    final newDate = state.value!.loadedDates.last.add(1.days);
-    final additionalDates = List.generate(
-      MonitoringPageState.daysToPreload - 1,
-      (index) => newDate.add((index + 1).days),
-    );
-    unawaited(_preloadManyDatesMonitoringData([newDate, ...additionalDates]));
-    state = AsyncValue.data(
-      state.value!.copyWith(
-        loadedDates: [
-          ...state.value!.loadedDates.skip(1),
-          newDate,
-        ],
-      ),
-    );
-  }
-
-  void prev() {
-    final newDate = state.value!.loadedDates.first.subtract(1.days);
-    final additionalDates = List.generate(
-      MonitoringPageState.daysToPreload - 1,
-      (index) => newDate.subtract((index + 1).days),
-    );
-    unawaited(_preloadManyDatesMonitoringData([newDate, ...additionalDates]));
-    state = AsyncValue.data(
-      state.value!.copyWith(
-        loadedDates: [
-          newDate,
-          ...state.value!.loadedDates.take(state.value!.loadedDates.length - 1),
-        ],
-      ),
-    );
-  }
-
-  void setDate(DateTime date) {
-    state = AsyncValue.data(
-      MonitoringPageState(loadedDates: _generateAndPreloadList(date)),
-    );
+  List<DateTime> _generateList(DateTime date) {
+    if (date.formattedDate == DateTime.now().formattedDate) {
+      return List.generate(
+        MonitoringPageState.daysToPreload + 1,
+        (index) => date.subtract(index.days).date,
+      );
+    } else {
+      return List.generate(
+        MonitoringPageState.daysToLoad,
+        (index) =>
+            date.add((index - MonitoringPageState.daysToPreload).days).date,
+      );
+    }
   }
 
   Future<void> _preloadManyDatesMonitoringData(List<DateTime> dates) async {
@@ -86,4 +53,20 @@ class MonitoringPageController extends _$MonitoringPageController {
     DateTime date,
   ) async =>
       ref.read(monitoringWidgetControllerProvider(metricType, date).future);
+
+  void preloadData(DateTime date) {
+    final neededDates = _generateList(date);
+    final missingDates = neededDates
+        .where((element) => !state.value!.loadedDates.contains(element))
+        .toList();
+    state = AsyncValue.data(
+      state.value!.copyWith(
+        loadedDates: [
+          ...missingDates,
+          ...state.value!.loadedDates,
+        ]..sort(),
+      ),
+    );
+    unawaited(_preloadManyDatesMonitoringData(missingDates));
+  }
 }

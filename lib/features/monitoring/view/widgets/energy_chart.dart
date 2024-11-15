@@ -3,12 +3,15 @@ import 'package:energy_manager_app/foundation/foundation.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-// ToDo change PageView so that it has values from 2000-2100 and keep alive
-// the pages that were opened
-
 class EnergyChart extends StatelessWidget {
-  const EnergyChart({required this.data, required this.config, super.key});
+  const EnergyChart({
+    required this.data,
+    required this.config,
+    required this.date,
+    super.key,
+  });
   final List<MonitoringDataModel> data;
+  final String date;
   final EnergyChartConfig config;
 
   static DownsamplingContext downsamplingContext = DownsamplingContext(
@@ -30,6 +33,7 @@ class EnergyChart extends StatelessWidget {
     maxYValue += interval; // Add interval to have padding at the top
 
     return LineChart(
+      key: ValueKey(date),
       LineChartData(
         gridData: const FlGridData(
           drawVerticalLine: false,
@@ -133,6 +137,9 @@ class EnergyChart extends StatelessWidget {
     if (value % 240 == 0) {
       final time = _getTimeOfDay(value);
       text = time.format(context);
+      if (value == 1440) {
+        text = const TimeOfDay(hour: 23, minute: 59).format(context);
+      }
     }
 
     return SideTitleWidget(

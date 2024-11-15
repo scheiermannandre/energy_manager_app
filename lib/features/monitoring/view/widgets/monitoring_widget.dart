@@ -1,4 +1,5 @@
 import 'package:energy_manager_app/features/monitoring/monitoring.dart';
+import 'package:energy_manager_app/foundation/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,7 +21,18 @@ class MonitoringWidget extends ConsumerWidget {
         return Center(
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: EnergyChart(data: data, config: EnergyChartConfig()),
+            child: Column(
+              children: [
+                Text(date.formattedDate),
+                Expanded(
+                  child: EnergyChart(
+                    data: data,
+                    config: EnergyChartConfig(),
+                    date: date.formattedDate,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
