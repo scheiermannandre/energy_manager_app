@@ -1,8 +1,12 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:energy_manager_app/features/monitoring/monitoring.dart';
+import 'package:energy_manager_app/foundation/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'main.g.dart';
 
 // DONE
 // Graph and Data Visualization
@@ -14,6 +18,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // support Data Downsampling
 // support Data Caching
 // add option to clear cache
+// Pull-to-refresh functionality.
 
 // TODO:
 // TODO: Implement user-friendly error messages for connectivity issues or request failures.
@@ -32,14 +37,52 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // • Bonus: Implementation of nice-to-have features like pull-to-refresh, dark mode, and data polling.
 
 // TODO: Optionals
-// TODO: Pull-to-refresh functionality.
 // TODO: Dark mode support.
 // TODO: Datapolling to automatically refresh data
 
 void main() {
   runApp(
-    const ProviderScope(
-      child: MonitoringScreen(),
+    ProviderScope(
+      child: AppStartupWidget(
+        onLoaded: (context) => const MaterialApp(home: MonitoringScreen()),
+      ),
     ),
   );
+}
+
+class AppStartupWidget extends ConsumerWidget {
+  const AppStartupWidget({required this.onLoaded, super.key});
+  final WidgetBuilder onLoaded;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appStartupState = ref.watch(appStartupProvider);
+    return appStartupState.when(
+      loading: () => const AppStartUpLoadingWidget(),
+      error: (e, st) => AppStartUpLoadingErrorWidget(
+        error: e,
+        stackTrace: st,
+        onReload: () => ref.invalidate(appStartupProvider),
+      ),
+      data: (_) => onLoaded(context),
+    );
+  }
+}
+
+@Riverpod(keepAlive: true)
+Future<void> appStartup(Ref ref) async {
+  final solar = monitoringPageControllerProvider(MetricType.solar);
+  final house = monitoringPageControllerProvider(MetricType.house);
+  final battery = monitoringPageControllerProvider(MetricType.battery);
+  ref.onDispose(() {
+    ref
+      ..invalidate(solar)
+      ..invalidate(house)
+      ..invalidate(battery);
+  });
+  await Future.wait<void>([
+    ref.read(solar.future),
+    ref.read(house.future),
+    ref.read(battery.future),
+  ]);
 }

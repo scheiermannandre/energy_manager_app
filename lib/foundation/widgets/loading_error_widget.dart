@@ -54,3 +54,28 @@ class LoadingErrorWidget extends HookWidget {
     );
   }
 }
+
+class AppStartUpLoadingErrorWidget extends StatelessWidget {
+  const AppStartUpLoadingErrorWidget({
+    required this.onReload,
+    required this.error,
+    this.stackTrace,
+    super.key,
+  });
+  final VoidCallback onReload;
+  final Object error;
+  final StackTrace? stackTrace;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: LoadingErrorWidget(
+          error: error,
+          stackTrace: stackTrace,
+          onReload: onReload,
+        ),
+      ),
+    );
+  }
+}

@@ -9,6 +9,15 @@ part 'monitoring_page_controller.g.dart';
 class MonitoringPageController extends _$MonitoringPageController {
   @override
   FutureOr<MonitoringPageState> build(MetricType metricType) async {
+    // the keep alive on that controller is necessary to keep the link alive,
+    // after it was eagerly initialized, otherwise the controller would be
+    // disposed after the first build, thus all data would be lost
+    final link = ref.keepAlive();
+    Timer? timer;
+    ref
+      ..onDispose(() => timer?.cancel())
+      ..onCancel(() => timer = Timer(30.seconds, link.close))
+      ..onResume(() => timer?.cancel());
     final now = DateTime.now().date;
     return MonitoringPageState(
       startDate: now,
