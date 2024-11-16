@@ -37,7 +37,7 @@ class MonitoringPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: asyncState.customWhen(
+      body: asyncState.when(
         data: (state) => HookBuilder(
           builder: (context) {
             final controller =
