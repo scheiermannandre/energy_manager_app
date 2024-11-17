@@ -16,16 +16,21 @@ class MonitoringWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshIndicatorKey = useState(GlobalKey<RefreshIndicatorState>());
-    final monitoringData =
-        ref.watch(monitoringWidgetControllerProvider(metricType, date));
-    return monitoringData.when(
-      data: (data) {
-        return RefreshIndicator(
-          key: refreshIndicatorKey.value,
-          onRefresh: () async => ref.refresh(
-            monitoringWidgetControllerProvider(metricType, date).future,
-          ),
-          child: Stack(
+    final monitoringDataProvider =
+        monitoringWidgetControllerProvider(metricType, date);
+    final monitoringData = ref.watch(monitoringDataProvider);
+    ref.listen(monitoringDataProvider, (_, newState) {
+      newState.showAlertDialogOnError(context);
+    });
+    return RefreshIndicator(
+      key: refreshIndicatorKey.value,
+      onRefresh: () async => ref
+          .refresh(monitoringWidgetControllerProvider(metricType, date).future)
+          .then((_) {})
+          .catchError((_) {}),
+      child: monitoringData.when(
+        data: (data) {
+          return Stack(
             alignment: Alignment.center,
             children: [
               if (data.isEmpty)
@@ -53,15 +58,15 @@ class MonitoringWidget extends HookConsumerWidget {
                   ],
                 ),
             ],
-          ),
-        );
-      },
-      loading: LoadingWidget.new,
-      error: (error, st) => LoadingErrorWidget(
-        onReload: () async => ref
-            .invalidate(monitoringWidgetControllerProvider(metricType, date)),
-        error: error,
-        stackTrace: st,
+          );
+        },
+        loading: LoadingWidget.new,
+        error: (error, st) => LoadingErrorWidget(
+          onReload: () async =>
+              await refreshIndicatorKey.value.currentState?.show(),
+          error: error,
+          stackTrace: st,
+        ),
       ),
     );
   }

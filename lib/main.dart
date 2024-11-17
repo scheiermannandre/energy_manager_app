@@ -19,10 +19,9 @@ part 'main.g.dart';
 // support Data Caching
 // add option to clear cache
 // Pull-to-refresh functionality.
+// Implement user-friendly error messages for connectivity issues or request failures.
 
 // TODO:
-// TODO: Implement user-friendly error messages for connectivity issues or request failures.
-
 // TODO: Include unit tests for core business logic.
 // TODO: Add widget tests to validate UI components and interactions
 // TODO: Instructions for running the application.
@@ -56,13 +55,13 @@ class AppStartupWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appStartupState = ref.watch(appStartupProvider);
-    return appStartupState.when(
+    final appStartupState = ref.watch(appStartUpProvider);
+    return appStartupState.customWhen(
       loading: () => const AppStartUpLoadingWidget(),
       error: (e, st) => AppStartUpLoadingErrorWidget(
         error: e,
         stackTrace: st,
-        onReload: () => ref.invalidate(appStartupProvider),
+        onReload: () => ref.refresh(appStartUpProvider),
       ),
       data: (_) => onLoaded(context),
     );
@@ -70,19 +69,13 @@ class AppStartupWidget extends ConsumerWidget {
 }
 
 @Riverpod(keepAlive: true)
-Future<void> appStartup(Ref ref) async {
+FutureOr<void> appStartUp(Ref ref) async {
   final solar = monitoringPageControllerProvider(MetricType.solar);
   final house = monitoringPageControllerProvider(MetricType.house);
   final battery = monitoringPageControllerProvider(MetricType.battery);
-  ref.onDispose(() {
-    ref
-      ..invalidate(solar)
-      ..invalidate(house)
-      ..invalidate(battery);
-  });
   await Future.wait<void>([
-    ref.read(solar.future),
-    ref.read(house.future),
-    ref.read(battery.future),
+    ref.refresh(solar.future),
+    ref.refresh(house.future),
+    ref.refresh(battery.future),
   ]);
 }

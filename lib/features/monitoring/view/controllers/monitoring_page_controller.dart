@@ -18,10 +18,15 @@ class MonitoringPageController extends _$MonitoringPageController {
       ..onDispose(() => timer?.cancel())
       ..onCancel(() => timer = Timer(30.seconds, link.close))
       ..onResume(() => timer?.cancel());
+    return _init();
+  }
+
+  Future<MonitoringPageState> _init() async {
     final now = DateTime.now().date;
+    final loadedDates = await _generateAndPreloadListAsync(now);
     return MonitoringPageState(
       startDate: now,
-      loadedDates: await _generateAndPreloadListAsync(now),
+      loadedDates: loadedDates,
       availableDates: List.generate(
         now.difference(DateTime(MonitoringPageState.firstDateYear)).inDays,
         (index) => now.subtract(index.days).date,
@@ -39,6 +44,10 @@ class MonitoringPageController extends _$MonitoringPageController {
 
   Future<List<DateTime>> _generateAndPreloadListAsync(DateTime date) async {
     final dates = _generateList(date);
+    // error happening here should NOT be caught, as this is the initial load
+    // since the users have not yet interacted with the app, we only let them
+    // pass, if data ia aactually available. Errors will be displayed at the
+    // app start up level.
     await _preloadManyDatesMonitoringData(dates);
     return dates;
   }
@@ -58,18 +67,23 @@ class MonitoringPageController extends _$MonitoringPageController {
     }
   }
 
-  Future<void> _preloadManyDatesMonitoringData(List<DateTime> dates) async {
-    // error can be ignored here, since this call is only there to preload the
-    // data error handling is done in the Widget actually working with the data
-    return Future.wait(dates.map(_preloadDatesMonitoringData))
-        .then((data) {})
-        .catchError((e) {});
+  Future<void> _preloadManyDatesMonitoringData(
+    List<DateTime> dates, {
+    bool catchErrors = false,
+  }) async {
+    if (catchErrors) {
+      return Future.wait(dates.map(_preloadDatesMonitoringData))
+          .then((_) {})
+          .catchError((e) {});
+    } else {
+      return Future.wait(dates.map(_preloadDatesMonitoringData)).then((_) {});
+    }
   }
 
   Future<List<MonitoringDataModel>> _preloadDatesMonitoringData(
     DateTime date,
   ) async =>
-      ref.read(monitoringWidgetControllerProvider(metricType, date).future);
+      ref.refresh(monitoringWidgetControllerProvider(metricType, date).future);
 
   void preloadData(DateTime date) {
     final neededDates = _generateList(date);
@@ -84,6 +98,10 @@ class MonitoringPageController extends _$MonitoringPageController {
         ]..sort(),
       ),
     );
-    unawaited(_preloadManyDatesMonitoringData(missingDates));
+    // catch errors because at this point in time we are not in the startup
+    // phase and the user once fetched data, so its likely he experiences just a
+    // temporary issue, which should be displayed at the widget level
+    // rather than here.
+    unawaited(_preloadManyDatesMonitoringData(missingDates, catchErrors: true));
   }
 }

@@ -13,6 +13,9 @@ class AppStartUpLoadingWidget extends StatelessWidget {
   const AppStartUpLoadingWidget({super.key});
 
   @override
-  Widget build(BuildContext context) =>
-      const MaterialApp(home: Scaffold(body: LoadingWidget()));
+  Widget build(BuildContext context) => const MaterialApp(
+        home: Scaffold(
+          body: LoadingWidget(),
+        ),
+      );
 }
