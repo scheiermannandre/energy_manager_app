@@ -24,9 +24,9 @@ part 'main.g.dart';
 // Datapolling to automatically refresh data
 // Include unit tests for core business logic.
 // Include widget tests for UI components and interactions.
+// Instructions for running the application.
 
 // TODO:
-// TODO: Instructions for running the application.
 // TODO: Ensure to include detailed documentation for the solution.
 // TODO: A short description of trade-offs or design choices made due to time constraints.
 
