@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:energy_manager_app/features/monitoring/monitoring.dart';
 import 'package:energy_manager_app/features/settings/settings.dart';
 import 'package:energy_manager_app/foundation/foundation.dart';
@@ -59,9 +60,9 @@ class MonitoringPage extends ConsumerWidget {
                 pickDate: () async {
                   final pickedDate = await showDatePicker(
                     context: context,
-                    initialDate: DateTime.now(),
+                    initialDate: clock.now(),
                     firstDate: DateTime(MonitoringPageState.firstDateYear),
-                    lastDate: DateTime.now().date,
+                    lastDate: clock.now().date,
                   );
 
                   if (pickedDate != null) {

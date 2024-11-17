@@ -13,9 +13,11 @@ class SettingsScreen extends ConsumerWidget {
     final powerUnitContext = ref.watch(powerUnitControllerProvider);
     final powerUnitController = ref.read(powerUnitControllerProvider.notifier);
 
-    final downsampleContextControllerProvider = downsamplingContextControllerProvider;
+    final downsampleContextControllerProvider =
+        downsamplingContextControllerProvider;
     final downsampleContext = ref.watch(downsampleContextControllerProvider);
-    final downsampleController = ref.read(downsampleContextControllerProvider.notifier);
+    final downsampleController =
+        ref.read(downsampleContextControllerProvider.notifier);
 
     final themeMode = ref.watch(themeModeControllerProvider);
     final themeController = ref.read(themeModeControllerProvider.notifier);
@@ -33,7 +35,8 @@ class SettingsScreen extends ConsumerWidget {
               value: powerUnitContext.unit,
               onChanged: (PowerUnit? newValue) {
                 if (newValue == null) return;
-                powerUnitController.switchStrategy(PowerUnitStrategy.fromUnit(newValue));
+                powerUnitController
+                    .switchStrategy(PowerUnitStrategy.fromUnit(newValue));
               },
               items: [
                 DropdownMenuItem<PowerUnit>(
@@ -104,7 +107,8 @@ class SettingsScreen extends ConsumerWidget {
                   .clearCache();
               ref
                   .read(
-                    monitoringPageControllerProvider(MetricType.battery).notifier,
+                    monitoringPageControllerProvider(MetricType.battery)
+                        .notifier,
                   )
                   .clearCache();
             },
