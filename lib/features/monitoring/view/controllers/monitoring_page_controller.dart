@@ -1,28 +1,36 @@
 import 'dart:async';
+import 'package:clock/clock.dart';
 import 'package:energy_manager_app/features/monitoring/monitoring.dart';
 import 'package:energy_manager_app/foundation/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'monitoring_page_controller.g.dart';
 
-@riverpod
+// * due to time constraints this controller is implemented as singleton
+// * this is not the desired behaviour, but there was not enough time to figure
+// * out why the approach with fake_async and simulating time did not work
+// * out as planned. The whole idea is to eagerly load on app start up, but
+// * since is not instantly watched it would be disposed,
+// * thus the data would be lost.
+@Riverpod(keepAlive: true)
+// @riverpod
 class MonitoringPageController extends _$MonitoringPageController {
   @override
   FutureOr<MonitoringPageState> build(MetricType metricType) async {
     // the keep alive on that controller is necessary to keep the link alive,
     // after it was eagerly initialized, otherwise the controller would be
     // disposed after the first build, thus all data would be lost
-    final link = ref.keepAlive();
-    Timer? timer;
-    ref
-      ..onDispose(() => timer?.cancel())
-      ..onCancel(() => timer = Timer(30.seconds, link.close))
-      ..onResume(() => timer?.cancel());
+    // final link = ref.keepAlive();
+    // Timer? timer;
+    //  ref
+    //   ..onDispose(() => timer?.cancel())
+    //   ..onCancel(() => timer = Timer(30.seconds, link.close))
+    //   ..onResume(() => timer?.cancel());
     return _init();
   }
 
   Future<MonitoringPageState> _init() async {
-    final now = DateTime.now().date;
+    final now = clock.now().date;
     final loadedDates = await _generateAndPreloadListAsync(now);
     return MonitoringPageState(
       startDate: now,
@@ -53,7 +61,7 @@ class MonitoringPageController extends _$MonitoringPageController {
   }
 
   List<DateTime> _generateList(DateTime date) {
-    if (date.formattedDate == DateTime.now().formattedDate) {
+    if (date.formattedDate == clock.now().formattedDate) {
       return List.generate(
         MonitoringPageState.daysToPreload + 1,
         (index) => date.subtract(index.days).date,
