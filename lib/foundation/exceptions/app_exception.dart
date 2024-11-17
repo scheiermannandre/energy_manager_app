@@ -11,6 +11,7 @@ class AppException with _$AppException implements Exception {
   const factory AppException.network() = NetworkAppException;
   const factory AppException.timeout() = TimeoutAppException;
   const factory AppException.versionOutdated() = VersionOutdatedAppException;
+  const factory AppException.pollingFailed() = PollingFailed;
 }
 
 extension AppExceptionDetails on AppException {
@@ -38,6 +39,12 @@ extension AppExceptionDetails on AppException {
         title: 'App Version Outdated'.hardCoded,
         message:
             'There was a problem with the data. Please update the app and try again.'
+                .hardCoded,
+      ),
+      pollingFailed: () => AppExceptionData(
+        title: 'Polling Failed'.hardCoded,
+        message:
+            'There was a problem when polling the most recent data. We have been notified and are working on it.'
                 .hardCoded,
       ),
     );

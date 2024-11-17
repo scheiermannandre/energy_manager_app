@@ -15,6 +15,12 @@ class MonitoringWidgetController extends _$MonitoringWidgetController {
     DateTime date,
   ) async {
     final dateStr = DateFormat('yyyy-MM-dd').format(date);
+    if (date.date == DateTime.now().date) {
+      ref
+          .read(pollingServiceProvider(metricType, dateStr))
+          .stream
+          .listen(streamOnData, onError: streamOnError);
+    }
     final link = ref.keepAlive();
     Timer? timer;
     ref
@@ -27,4 +33,8 @@ class MonitoringWidgetController extends _$MonitoringWidgetController {
   }
 
   void clearData() => state = const AsyncValue.data([]);
+
+  void streamOnData(List<MonitoringDataModel> data) => state = AsyncData(data);
+  void streamOnError(Object error) =>
+      state = AsyncError(error, StackTrace.current);
 }

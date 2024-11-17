@@ -5,6 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 extension AsyncValueUI<T> on AsyncValue<T> {
   Future<bool?> showAlertDialogOnError(BuildContext context) async {
     if (!isRefreshing && hasError) {
+      // automatically close the dialog after 10 seconds
+      // this was actually necessary to prevent the dialog from being shown over
+      // and over again, when the user is not closing it.
+      // this especially necessary when streaming data up to the ui.
+      Future.delayed(10.seconds, () {
+        if (!context.mounted) return;
+        Navigator.of(context).pop();
+      });
       final exceptionData = _errorMessage(error);
       await showDialog<void>(
         context: context,
