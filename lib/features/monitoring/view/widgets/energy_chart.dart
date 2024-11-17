@@ -179,14 +179,9 @@ class EnergyChartConfig {
     TextStyle? yAxisTextStyle,
     TextStyle? tooltipTextStyle,
   })  : barAreaColor = areaBewlowBarColor ?? lineColor.withOpacity(0.3),
-        xAxisStyle = xAxisTextStyle ??
-            TextStyle(
-              color: titleTextColor,
-              fontSize: titleFontSize,
-            ),
+        xAxisStyle = xAxisTextStyle ?? const TextStyle(fontSize: titleFontSize),
         yAxisStyle = yAxisTextStyle ??
-            TextStyle(
-              color: titleTextColor,
+            const TextStyle(
               fontSize: titleFontSize,
               fontWeight: FontWeight.bold,
             ),

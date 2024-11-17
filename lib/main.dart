@@ -20,6 +20,7 @@ part 'main.g.dart';
 // add option to clear cache
 // Pull-to-refresh functionality.
 // Implement user-friendly error messages for connectivity issues or request failures.
+// Dark mode support
 
 // TODO:
 // TODO: Include unit tests for core business logic.
@@ -36,17 +37,32 @@ part 'main.g.dart';
 // • Bonus: Implementation of nice-to-have features like pull-to-refresh, dark mode, and data polling.
 
 // TODO: Optionals
-// TODO: Dark mode support.
 // TODO: Datapolling to automatically refresh data
 
 void main() {
   runApp(
     ProviderScope(
       child: AppStartupWidget(
-        onLoaded: (context) => const MaterialApp(home: MonitoringScreen()),
+        onLoaded: (context) => const App(),
       ),
     ),
   );
+}
+
+class App extends ConsumerWidget {
+  const App({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeControllerProvider);
+
+    return MaterialApp(
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: themeMode,
+      home: const MonitoringScreen(),
+    );
+  }
 }
 
 class AppStartupWidget extends ConsumerWidget {

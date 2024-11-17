@@ -13,11 +13,12 @@ class SettingsScreen extends ConsumerWidget {
     final powerUnitContext = ref.watch(powerUnitControllerProvider);
     final powerUnitController = ref.read(powerUnitControllerProvider.notifier);
 
-    final downsampleContextControllerProvider =
-        downsamplingContextControllerProvider;
+    final downsampleContextControllerProvider = downsamplingContextControllerProvider;
     final downsampleContext = ref.watch(downsampleContextControllerProvider);
-    final downsampleController =
-        ref.read(downsampleContextControllerProvider.notifier);
+    final downsampleController = ref.read(downsampleContextControllerProvider.notifier);
+
+    final themeMode = ref.watch(themeModeControllerProvider);
+    final themeController = ref.read(themeModeControllerProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -27,13 +28,12 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           ListTile(
             leading: const Icon(Icons.flash_on),
-            title: Text('Power Unit'.hardCoded),
+            title: Text('Power unit'.hardCoded),
             trailing: DropdownButton<PowerUnit>(
               value: powerUnitContext.unit,
               onChanged: (PowerUnit? newValue) {
                 if (newValue == null) return;
-                powerUnitController
-                    .switchStrategy(PowerUnitStrategy.fromUnit(newValue));
+                powerUnitController.switchStrategy(PowerUnitStrategy.fromUnit(newValue));
               },
               items: [
                 DropdownMenuItem<PowerUnit>(
@@ -49,7 +49,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.functions),
-            title: Text('Down Sample Algorithm'.hardCoded),
+            title: Text('Sample algorithm'.hardCoded),
             trailing: DropdownButton<DownSamplingAlgorithm>(
               value: downsampleContext.algorithm,
               onChanged: (DownSamplingAlgorithm? newValue) {
@@ -71,8 +71,26 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           ListTile(
+            title: Text('Theme mode'.hardCoded),
+            leading: const Icon(Icons.brightness_6),
+            trailing: DropdownButton<ThemeMode>(
+              value: themeMode,
+              onChanged: (ThemeMode? newValue) {
+                if (newValue != null) {
+                  themeController.setTheme = newValue;
+                }
+              },
+              items: ThemeMode.values.map((ThemeMode mode) {
+                return DropdownMenuItem<ThemeMode>(
+                  value: mode,
+                  child: Text(mode.displayName),
+                );
+              }).toList(),
+            ),
+          ),
+          ListTile(
             leading: const Icon(Icons.clear),
-            title: Text('Clear Cache'.hardCoded),
+            title: Text('Clear cache'.hardCoded),
             onTap: () {
               ref
                   .read(
@@ -86,8 +104,7 @@ class SettingsScreen extends ConsumerWidget {
                   .clearCache();
               ref
                   .read(
-                    monitoringPageControllerProvider(MetricType.battery)
-                        .notifier,
+                    monitoringPageControllerProvider(MetricType.battery).notifier,
                   )
                   .clearCache();
             },
